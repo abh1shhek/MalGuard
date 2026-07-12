@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MalGuard — Professional Malware Analysis Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+<div class="ambient ambient-3"></div>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo" onclick="return false">
+      <div class="logo-shield">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="logo-text">Mal<b>Guard</b></div>
+    </a>
+
+    <div class="nav-center">
+      <button class="ntab active" onclick="showPage('scanner',this)">
+        <span class="ntab-icon">🛡️</span> Scanner
+      </button>
+      <button class="ntab" onclick="showPage('howitworks',this)">
+        <span class="ntab-icon">⚙️</span> How It Works
+      </button>
+      <button class="ntab" onclick="showPage('threatintel',this)">
+        <span class="ntab-icon">🌐</span> Threat Intel
+      </button>
+      <button class="ntab" onclick="showPage('research',this)">
+        <span class="ntag-icon">📚</span> Research
+      </button>
+    </div>
+
+    <div class="nav-right">
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☀</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== SCANNER PAGE ===== -->
+<div class="page active" id="page-scanner">
+  <div class="scanner-grid">
+
+    <!-- LEFT: HERO + SCAN CARD -->
+    <div>
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        AI-Powered Threat Analysis · v3.2.1
+      </div>
+      <h1>
+        Detect <span class="grad">Malware</span><br>
+        Before It<br>
+        <span class="grad2">Strikes</span>
+      </h1>
+      <p class="hero-desc">
+        MalGuard uses a 5-model deep learning ensemble — BERT, CNN, Bi-LSTM, Random Forest, and GPT-based reasoning — to analyze files, URLs, code snippets, and cryptographic hashes with 99.1% accuracy.
+      </p>
+      <div class="trust-badges">
+        <div class="tbadge"><span class="tbadge-icon">🔒</span> Zero data retention</div>
+        <div class="tbadge"><span class="tbadge-icon">⚡</span> &lt;3s analysis</div>
+        <div class="tbadge"><span class="tbadge-icon">🗄️</span> 2.3M threat signatures</div>
+        <div class="tbadge"><span class="tbadge-icon">🧠</span> 5-model ensemble</div>
+      </div>
+
+      <!-- SCAN CARD -->
+      <div class="scan-card">
+        <div class="card-header">
+          <button class="chtab active" onclick="switchTab(this,'file')">
+            <span class="chtab-dot">📁</span> File Upload
+          </button>
+          <button class="chtab" onclick="switchTab(this,'url')">
+            <span class="chtab-dot">🔗</span> URL Check
+          </button>
+          <button class="chtab" onclick="switchTab(this,'hash')">
+            <span class="chtab-dot">#</span> Hash Lookup
+          </button>
+          <button class="chtab" onclick="switchTab(this,'code')">
+            <span class="chtab-dot">&lt;/&gt;</span> Code Scan
+          </button>
+        </div>
+
+        <!-- FILE TAB -->
+        <div class="tab-pane active" id="tab-file">
+          <div class="upload-area">
+            <div class="drop-zone" id="dropZone"
+              ondragover="onDrag(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+              <input type="file" id="fileInput" onchange="onFileSelect(event)">
+              <div class="dz-icon">📂</div>
+              <div class="dz-title">Drop file to scan</div>
+              <div class="dz-sub">or click to browse from your device</div>
+              <div class="dz-fmts">
+                <span class="fmt-tag">.exe</span><span class="fmt-tag">.dll</span>
+                <span class="fmt-tag">.pdf</span><span class="fmt-tag">.docx</span>
+                <span class="fmt-tag">.apk</span><span class="fmt-tag">.js</span>
+                <span class="fmt-tag">.py</span><span class="fmt-tag">.sh</span>
+                <span class="fmt-tag">.zip</span><span class="fmt-tag">+more</span>
+              </div>
+            </div>
+            <div class="file-preview" id="fileRow">
+              <div class="fp-icon" id="ficon">📄</div>
+              <div class="fp-info">
+                <div class="fp-name" id="fname"></div>
+                <div class="fp-meta" id="fsize"></div>
+                <div class="fp-hash" id="fhash"></div>
+              </div>
+              <button class="fp-remove" onclick="removeFile()">✕</button>
+            </div>
+          </div>
+          <div class="scan-controls">
+            <div class="scan-options">
+              <div class="scan-opt selected" id="opt-static" onclick="toggleOpt(this)">
+                <div class="so-check"><span class="so-check-inner">✓</span></div>
+                <div><div class="so-label">Static Analysis</div><div class="so-desc">Structure & byte patterns</div></div>
+              </div>
+              <div class="scan-opt selected" id="opt-ai" onclick="toggleOpt(this)">
+                <div class="so-check"><span class="so-check-inner">✓</span></div>
+                <div><div class="so-label">AI Ensemble</div><div class="so-desc">Deep learning models</div></div>
+              </div>
+              <div class="scan-opt selected" id="opt-sig" onclick="toggleOpt(this)">
+                <div class="so-check"><span class="so-check-inner">✓</span></div>
+                <div><div class="so-label">Signature DB</div><div class="so-desc">2.3M+ known threats</div></div>
+              </div>
+              <div class="scan-opt" id="opt-behavior" onclick="toggleOpt(this)">
+                <div class="so-check"><span class="so-check-inner">✓</span></div>
+                <div><div class="so-label">Behavior Sim</div><div class="so-desc">Sandboxed execution</div></div>
+              </div>
+            </div>
+            <button class="btn-scan" id="scanBtn" onclick="startScan()" disabled>
+              🛡️ &nbsp;Run Security Analysis
+            </button>
+          </div>
+        </div>
+
+        <!-- URL TAB -->
+        <div class="tab-pane" id="tab-url">
+          <div class="input-section">
+            <div class="input-lbl">Check URL Safety</div>
+            <div class="input-hint">Enter any URL to check against phishing databases, malware distribution networks, and reputation engines.</div>
+            <div class="inp-wrap">
+              <span class="inp-prefix">https://</span>
+              <input class="text-input has-prefix" id="urlInput" type="url" placeholder="example.com/path/to/resource">
+            </div>
+            <button class="btn-primary" onclick="startUrlScan()">🔗 &nbsp;Analyze URL</button>
+            <div id="urlResult" style="margin-top:14px;display:none"></div>
+          </div>
+        </div>
+
+        <!-- HASH TAB -->
+        <div class="tab-pane" id="tab-hash">
+          <div class="input-section">
+            <div class="input-lbl">Hash Lookup</div>
+            <div class="input-hint">Check a file's MD5, SHA-1, or SHA-256 hash against our threat database of 2.3M+ known malicious file fingerprints.</div>
+            <input class="text-input" id="hashInput" type="text" placeholder="MD5, SHA-1, or SHA-256 hash…" style="margin-bottom:8px;font-size:12px">
+            <div style="display:flex;gap:6px;margin-bottom:12px">
+              <button onclick="setHashExample('md5')" style="flex:1;padding:6px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer;font-family:JetBrains Mono,monospace">MD5 example</button>
+              <button onclick="setHashExample('sha1')" style="flex:1;padding:6px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer;font-family:JetBrains Mono,monospace">SHA-1 example</button>
+              <button onclick="setHashExample('sha256')" style="flex:1;padding:6px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer;font-family:JetBrains Mono,monospace">SHA-256 example</button>
+            </div>
+            <button class="btn-primary" onclick="startHashLookup()">🔎 &nbsp;Lookup Hash</button>
+            <div id="hashResult" style="margin-top:14px;display:none"></div>
+          </div>
+        </div>
+
+        <!-- CODE TAB -->
+        <div class="tab-pane" id="tab-code">
+          <div class="input-section">
+            <div class="input-lbl">Code / Script Analysis</div>
+            <div class="input-hint">Paste any code, script, or obfuscated string. MalGuard's NLP models will check for malicious patterns, shellcode, and obfuscation techniques.</div>
+            <div class="textarea-wrap">
+              <textarea class="code-textarea" id="codeInput" placeholder="Paste JavaScript, Python, Bash, PowerShell, or any other code here…"></textarea>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+              <button onclick="loadCodeExample('ps')" style="padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer">PowerShell</button>
+              <button onclick="loadCodeExample('js')" style="padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer">JavaScript</button>
+              <button onclick="loadCodeExample('py')" style="padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer">Python</button>
+              <button onclick="loadCodeExample('bash')" style="padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--b1);color:var(--t3);font-size:10.5px;cursor:pointer">Bash</button>
+            </div>
+            <button class="btn-primary" onclick="startCodeScan()">🧠 &nbsp;Analyze Code</button>
+            <div id="codeResult" style="margin-top:14px;display:none"></div>
+          </div>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="prog-area" id="progArea">
+          <div class="prog-header">
+            <span class="prog-label" id="progLabel">Initializing…</span>
+            <span class="prog-pct" id="progPct">0%</span>
+          </div>
+          <div class="prog-track">
+            <div class="prog-fill" id="progFill"></div>
+          </div>
+          <div class="steps" id="stepsList">
+            <div class="sstep" id="s1"><div class="ss-ind"><div class="ss-spin"></div><div class="ss-dot"></div><span class="ss-check">✓</span></div><div><div class="ss-text">Static analysis — file structure parsing</div></div></div>
+            <div class="sstep" id="s2"><div class="ss-ind"><div class="ss-spin"></div><div class="ss-dot"></div><span class="ss-check">✓</span></div><div><div class="ss-text">NLP tokenization — encoding API sequences</div></div></div>
+            <div class="sstep" id="s3"><div class="ss-ind"><div class="ss-spin"></div><div class="ss-dot"></div><span class="ss-check">✓</span></div><div><div class="ss-text">AI ensemble inference — 5 models voting</div></div></div>
+            <div class="sstep" id="s4"><div class="ss-ind"><div class="ss-spin"></div><div class="ss-dot"></div><span class="ss-check">✓</span></div><div><div class="ss-text">Signature matching — 2.3M+ threat database</div></div></div>
+            <div class="sstep" id="s5"><div class="ss-ind"><div class="ss-spin"></div><div class="ss-dot"></div><span class="ss-check">✓</span></div><div><div class="ss-text">Compiling threat report &amp; IOC extraction</div></div></div>
+          </div>
+        </div>
+
+        <!-- RESULT -->
+        <div class="result-area" id="resultArea">
+          <div class="rbanner" id="rbanner">
+            <div class="r-icon" id="ricon">✅</div>
+            <div>
+              <div class="r-verdict" id="rverdict"></div>
+              <div class="r-explain" id="rexplain"></div>
+            </div>
+          </div>
+
+          <div class="risk-box">
+            <div class="risk-top">
+              <span class="risk-label">Risk Score</span>
+              <span class="risk-num" id="riskNum"></span>
+            </div>
+            <div class="risk-track">
+              <div class="risk-fill" id="riskFill"></div>
+            </div>
+            <div class="risk-zones">
+              <span class="rz">0 — Clean</span>
+              <span class="rz">50 — Medium</span>
+              <span class="rz">100 — Critical</span>
+            </div>
+          </div>
+
+          <div class="checks-grid" id="checksGrid"></div>
+
+          <div class="findings-wrap" id="findingsSection" style="display:none">
+            <div class="findings-header">
+              <span>Threat Findings</span>
+              <span class="fcount" id="findingsCount"></span>
+            </div>
+            <div id="findingsList"></div>
+          </div>
+
+          <div id="iocSection" style="display:none;margin-bottom:12px">
+            <div class="findings-header">IOC Artifacts</div>
+            <table class="ioc-table" id="iocTable">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Indicator</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody id="iocBody"></tbody>
+            </table>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-action btn-download" onclick="downloadReport()">⬇ Report</button>
+            <button class="btn-action btn-copy" onclick="copyReport()">📋 Copy</button>
+          </div>
+          <button class="btn-again" onclick="resetScan()">← Scan another file</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div class="sidebar">
+      <!-- LIVE STATS -->
+      <div class="scard">
+        <div class="scard-title">
+          Platform Stats
+          <span class="scard-badge">Live</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val blue" id="statScans">1,284,902</div>
+            <div class="stat-lbl">Total Scans</div>
+            <div class="stat-delta">+2,841 today</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val red">48,201</div>
+            <div class="stat-lbl">Threats Found</div>
+            <div class="stat-delta">+183 today</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val green">99.1%</div>
+            <div class="stat-lbl">Accuracy</div>
+            <div class="stat-delta">F1 = 0.993</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val amber">2.1s</div>
+            <div class="stat-lbl">Avg Analysis</div>
+            <div class="stat-delta">p99 &lt;4.8s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THREAT FEED -->
+      <div class="scard">
+        <div class="scard-title">
+          Live Threat Feed
+          <span class="scard-badge" style="background:rgba(255,69,103,.1);color:#ff6b86;border-color:rgba(255,69,103,.2)">Hot</span>
+        </div>
+        <div class="threat-feed">
+          <div class="tf-item">
+            <div class="tf-dot critical"></div>
+            <div class="tf-name">LockBit 4.0</div>
+            <div class="tf-time">2m ago</div>
+            <div class="tf-badge critical">Critical</div>
+          </div>
+          <div class="tf-item">
+            <div class="tf-dot critical"></div>
+            <div class="tf-name">AgentTesla v3</div>
+            <div class="tf-time">8m ago</div>
+            <div class="tf-badge critical">Critical</div>
+          </div>
+          <div class="tf-item">
+            <div class="tf-dot high"></div>
+            <div class="tf-name">RedLine Stealer</div>
+            <div class="tf-time">15m ago</div>
+            <div class="tf-badge high">High</div>
+          </div>
+          <div class="tf-item">
+            <div class="tf-dot high"></div>
+            <div class="tf-name">Cobalt Strike beacon</div>
+            <div class="tf-time">22m ago</div>
+            <div class="tf-badge high">High</div>
+          </div>
+          <div class="tf-item">
+            <div class="tf-dot medium"></div>
+            <div class="tf-name">Emotet variant</div>
+            <div class="tf-time">41m ago</div>
+            <div class="tf-badge medium">Medium</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT SCANS -->
+      <div class="scard">
+        <div class="scard-title">Recent Scans</div>
+        <div class="recent-list" id="recentList">
+          <div class="recent-item">
+            <div class="ri-icon">📄</div>
+            <div class="ri-info">
+              <div class="ri-name">invoice_2024.pdf</div>
+              <div class="ri-meta">3 min ago · 2.4 MB</div>
+            </div>
+            <div class="ri-badge safe">Safe</div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-icon">⚙️</div>
+            <div class="ri-info">
+              <div class="ri-name">setup_v2.exe</div>
+              <div class="ri-meta">12 min ago · 8.1 MB</div>
+            </div>
+            <div class="ri-badge danger">Threat</div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-icon">📝</div>
+            <div class="ri-info">
+              <div class="ri-name">report_Q3.docx</div>
+              <div class="ri-meta">28 min ago · 1.1 MB</div>
+            </div>
+            <div class="ri-badge warning">Suspicious</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREAT MAP -->
+  <div class="threat-map-wrap">
+    <div class="map-header">
+      <div>
+        <div class="map-title">🌍 Global Threat Map</div>
+        <div class="map-sub">Real-time malware activity across monitored endpoints</div>
+      </div>
+      <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+    </div>
+    <div class="world-map" id="worldMap">
+      <div class="map-grid"></div>
+    </div>
+    <div class="map-stat-row">
+      <div class="mstat"><div class="mstat-val" style="color:var(--danger)">3,841</div><div class="mstat-lbl">Active Threats</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:var(--warn)">142</div><div class="mstat-lbl">Countries Affected</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:var(--cyan)">12.4K</div><div class="mstat-lbl">IPs Blocked</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:var(--safe)">99.97%</div><div class="mstat-lbl">Uptime</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOW IT WORKS PAGE ===== -->
+<div class="page" id="page-howitworks">
+  <div class="section-eyebrow">Under the Hood</div>
+  <h2 class="section-title">Detection Pipeline</h2>
+  <p class="section-sub">MalGuard processes every file through a 5-stage ensemble pipeline combining classical machine learning, deep learning, and transformer-based NLP — all voting together for maximum accuracy.</p>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:rgba(79,127,255,.15);color:#7ab3ff">01</div>
+      <div class="pipe-name">File Ingestion</div>
+      <div class="pipe-desc">Raw bytes extracted, entropy computed, PE headers parsed, file type verified against magic bytes.</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:rgba(0,212,255,.12);color:var(--cyan)">02</div>
+      <div class="pipe-name">NLP Tokenization</div>
+      <div class="pipe-desc">API call sequences, opcodes, and strings tokenized as natural language using SentencePiece vocabulary.</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:rgba(124,92,252,.15);color:#a78bfa">03</div>
+      <div class="pipe-name">Ensemble Inference</div>
+      <div class="pipe-desc">MalBERT, CNN, Bi-LSTM, Random Forest, and GPT-4 all independently score the sample in parallel.</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:rgba(0,229,160,.12);color:var(--safe)">04</div>
+      <div class="pipe-name">Verdict Fusion</div>
+      <div class="pipe-desc">Weighted confidence voting aggregates model outputs into a single risk score with 99.1% accuracy.</div>
+    </div>
+  </div>
+
+  <h3 style="font-family:Outfit,sans-serif;font-size:20px;font-weight:800;letter-spacing:-.4px;margin-bottom:16px">Detection Techniques</h3>
+  <div class="techniques-grid">
+    <div class="tech-card">
+      <div class="tech-icon" style="background:rgba(79,127,255,.12)">🤖</div>
+      <div class="tech-name">MalBERT Transformer</div>
+      <div class="tech-desc">BERT fine-tuned on 500K malware samples. Treats source code and API sequences as natural language, capturing semantic intent of malicious code without hand-crafted rules.</div>
+      <div class="tech-tags"><span class="tech-tag">BERT</span><span class="tech-tag">NLP</span><span class="tech-tag">98.4%</span></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon" style="background:rgba(0,212,255,.1)">🖼️</div>
+      <div class="tech-name">CNN Visualization</div>
+      <div class="tech-desc">Binary files rendered as grayscale images. Convolutional layers detect structural anomalies invisible to signature scanners — especially effective against packed malware.</div>
+      <div class="tech-tags"><span class="tech-tag">CNN</span><span class="tech-tag">Vision</span><span class="tech-tag">97.2%</span></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon" style="background:rgba(124,92,252,.12)">⏱️</div>
+      <div class="tech-name">Bi-LSTM Sequences</div>
+      <div class="tech-desc">Bidirectional LSTM models API call sequences as temporal patterns. Identifies characteristic behavioral chains unique to ransomware, RATs, and keyloggers.</div>
+      <div class="tech-tags"><span class="tech-tag">LSTM</span><span class="tech-tag">Behavioral</span><span class="tech-tag">96.8%</span></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon" style="background:rgba(0,229,160,.1)">🌲</div>
+      <div class="tech-name">Random Forest Baseline</div>
+      <div class="tech-desc">600-tree ensemble on 148 hand-crafted features: entropy, import counts, section ratios, string heuristics. Fast, explainable, and complements deep learning models.</div>
+      <div class="tech-tags"><span class="tech-tag">ML</span><span class="tech-tag">Explainable</span><span class="tech-tag">91.3%</span></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon" style="background:rgba(255,179,64,.1)">🧩</div>
+      <div class="tech-name">Entropy Analysis</div>
+      <div class="tech-desc">Shannon entropy measured across file sections. High entropy sections indicate encryption or compression — strong indicators of packing and obfuscation common in modern malware.</div>
+      <div class="tech-tags"><span class="tech-tag">Static</span><span class="tech-tag">Packing</span><span class="tech-tag">Detection</span></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon" style="background:rgba(255,69,103,.1)">🔗</div>
+      <div class="tech-name">Signature Matching</div>
+      <div class="tech-desc">YARA rules and cryptographic hash lookup against 2.3M+ known malicious file signatures, updated continuously from 14 global threat intelligence feeds.</div>
+      <div class="tech-tags"><span class="tech-tag">YARA</span><span class="tech-tag">Signatures</span><span class="tech-tag">2.3M+</span></div>
+    </div>
+  </div>
+
+  <div class="accuracy-section">
+    <div class="acc-header">
+      <div>
+        <div class="acc-title">Model Accuracy Benchmarks</div>
+        <div class="acc-sub">Evaluated on BODMAS + SOREL-20M datasets · 200K test samples</div>
+      </div>
+    </div>
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="metric-val" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">99.1%</div>
+        <div class="metric-lbl">Accuracy</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:var(--safe)">99.3%</div>
+        <div class="metric-lbl">Precision</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:var(--cyan)">98.9%</div>
+        <div class="metric-lbl">Recall</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:var(--warn)">0.993</div>
+        <div class="metric-lbl">F1 Score</div>
+      </div>
+    </div>
+    <div class="model-bars">
+      <div class="mbar-row">
+        <div class="mbar-lbl">MalBERT Transformer</div>
+        <div class="mbar-track"><div class="mbar-fill" style="background:linear-gradient(90deg,#4f7fff,#7ab3ff)" data-w="98.4"></div></div>
+        <div class="mbar-num">98.4%</div>
+      </div>
+      <div class="mbar-row">
+        <div class="mbar-lbl">CNN Visualization</div>
+        <div class="mbar-track"><div class="mbar-fill" style="background:linear-gradient(90deg,#7c5cfc,#a78bfa)" data-w="97.2"></div></div>
+        <div class="mbar-num">97.2%</div>
+      </div>
+      <div class="mbar-row">
+        <div class="mbar-lbl">Bi-LSTM Sequence</div>
+        <div class="mbar-track"><div class="mbar-fill" style="background:linear-gradient(90deg,#00d4ff,#7cf4ff)" data-w="96.8"></div></div>
+        <div class="mbar-num">96.8%</div>
+      </div>
+      <div class="mbar-row">
+        <div class="mbar-lbl">Random Forest (baseline)</div>
+        <div class="mbar-track"><div class="mbar-fill" style="background:linear-gradient(90deg,#f0900a,#ffb340)" data-w="91.3"></div></div>
+        <div class="mbar-num">91.3%</div>
+      </div>
+      <div class="mbar-row">
+        <div class="mbar-lbl">Full Ensemble</div>
+        <div class="mbar-track"><div class="mbar-fill" style="background:linear-gradient(90deg,#00b87a,#00e5a0)" data-w="99.1"></div></div>
+        <div class="mbar-num">99.1%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="comparison-section">
+    <div class="comp-title">MalGuard vs. Traditional Tools</div>
+    <div class="comp-table-wrap">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th style="color:#7ab3ff">MalGuard</th>
+            <th>Signature-Only AV</th>
+            <th>Sandbox Emulation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td class="comp-feature">Zero-day detection</td>
+            <td><span class="comp-check">✓ Yes</span></td>
+            <td><span class="comp-x">✗ No</span></td>
+            <td><span class="comp-partial">~ Partial</span></td>
+          </tr>
+          <tr>
+            <td class="comp-feature">Analysis speed</td>
+            <td><span class="comp-check">✓ &lt;3s</span></td>
+            <td><span class="comp-check">✓ &lt;1s</span></td>
+            <td><span class="comp-x">✗ 2–10 min</span></td>
+          </tr>
+          <tr class="highlight">
+            <td class="comp-feature">Packed malware</td>
+            <td><span class="comp-check">✓ Yes</span></td>
+            <td><span class="comp-x">✗ No</span></td>
+            <td><span class="comp-check">✓ Yes</span></td>
+          </tr>
+          <tr>
+            <td class="comp-feature">IOC extraction</td>
+            <td><span class="comp-check">✓ Yes</span></td>
+            <td><span class="comp-x">✗ No</span></td>
+            <td><span class="comp-partial">~ Basic</span></td>
+          </tr>
+          <tr class="highlight">
+            <td class="comp-feature">Obfuscated code</td>
+            <td><span class="comp-check">✓ Yes</span></td>
+            <td><span class="comp-x">✗ No</span></td>
+            <td><span class="comp-partial">~ Limited</span></td>
+          </tr>
+          <tr>
+            <td class="comp-feature">Explainable results</td>
+            <td><span class="comp-check">✓ Full</span></td>
+            <td><span class="comp-x">✗ No</span></td>
+            <td><span class="comp-partial">~ Logs only</span></td>
+          </tr>
+          <tr class="highlight">
+            <td class="comp-feature">Accuracy</td>
+            <td><span class="comp-check">✓ 99.1%</span></td>
+            <td class="comp-partial">~70–85%</td>
+            <td class="comp-partial">~85–92%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== THREAT INTEL PAGE ===== -->
+<div class="page" id="page-threatintel">
+  <div class="section-eyebrow">Intelligence Database</div>
+  <h2 class="section-title">Threat Intelligence</h2>
+  <p class="section-sub">Live data from 14 threat intelligence feeds, updated continuously. Browse active malware families, attack vectors, CVEs, and the MITRE ATT&CK heatmap.</p>
+
+  <div class="intel-grid">
+    <!-- TOP MALWARE FAMILIES -->
+    <div class="intel-card">
+      <div class="ic-header">
+        <div class="ic-title">Top Malware Families</div>
+        <div class="ic-meta">Last 30 days</div>
+      </div>
+      <div class="family-list" id="familyList">
+        <div class="family-item">
+          <div class="fi-rank" style="background:rgba(255,69,103,.15);color:#ff6b86">#1</div>
+          <div class="fi-info"><div class="fi-name">LockBit 4.0</div><div class="fi-type">Ransomware</div></div>
+          <div class="fi-bar-wrap"><div class="fi-bar-track"><div class="fi-bar-fill" style="background:#ff4567" data-w="92"></div></div><div class="fi-pct">92%</div></div>
+        </div>
+        <div class="family-item">
+          <div class="fi-rank" style="background:rgba(255,179,64,.15);color:#ffb340">#2</div>
+          <div class="fi-info"><div class="fi-name">AgentTesla</div><div class="fi-type">Infostealer</div></div>
+          <div class="fi-bar-wrap"><div class="fi-bar-track"><div class="fi-bar-fill" style="background:#ffb340" data-w="78"></div></div><div class="fi-pct">78%</div></div>
+        </div>
+        <div class="family-item">
+          <div class="fi-rank" style="background:rgba(255,179,64,.15);color:#ffb340">#3</div>
+          <div class="fi-info"><div class="fi-name">Emotet</div><div class="fi-type">Botnet</div></div>
+          <div class="fi-bar-wrap"><div class="fi-bar-track"><div class="fi-bar-fill" style="background:#ffb340" data-w="64"></div></div><div class="fi-pct">64%</div></div>
+        </div>
+        <div class="family-item">
+          <div class="fi-rank" style="background:rgba(79,127,255,.12);color:#7ab3ff">#4</div>
+          <div class="fi-info"><div class="fi-name">RedLine</div><div class="fi-type">Credential Stealer</div></div>
+          <div class="fi-bar-wrap"><div class="fi-bar-track"><div class="fi-bar-fill" style="background:#4f7fff" data-w="55"></div></div><div class="fi-pct">55%</div></div>
+        </div>
+        <div class="family-item">
+          <div class="fi-rank" style="background:rgba(79,127,255,.12);color:#7ab3ff">#5</div>
+          <div class="fi-info"><div class="fi-name">AsyncRAT</div><div class="fi-type">Remote Access Trojan</div></div>
+          <div class="fi-bar-wrap"><div class="fi-bar-track"><div class="fi-bar-fill" style="background:#4f7fff" data-w="41"></div></div><div class="fi-pct">41%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT CVEs -->
+    <div class="intel-card">
+      <div class="ic-header">
+        <div class="ic-title">Critical CVEs</div>
+        <div class="ic-meta">Actively exploited</div>
+      </div>
+      <div class="cve-list">
+        <div class="cve-item">
+          <div class="cve-score" style="background:rgba(255,69,103,.12)">
+            <div class="cve-score-val" style="color:#ff6b86">9.8</div>
+            <div class="cve-score-lbl" style="color:#ff6b86">CVSS</div>
+          </div>
+          <div class="cve-info">
+            <div class="cve-id">CVE-2024-21762</div>
+            <div class="cve-desc">Fortinet SSL-VPN RCE — unauthenticated</div>
+            <div class="cve-meta">Fortinet FortiOS · Actively Exploited</div>
+          </div>
+          <div class="cve-badge critical">Critical</div>
+        </div>
+        <div class="cve-item">
+          <div class="cve-score" style="background:rgba(255,69,103,.12)">
+            <div class="cve-score-val" style="color:#ff6b86">9.6</div>
+            <div class="cve-score-lbl" style="color:#ff6b86">CVSS</div>
+          </div>
+          <div class="cve-info">
+            <div class="cve-id">CVE-2024-3400</div>
+            <div class="cve-desc">Palo Alto GlobalProtect OS command injection</div>
+            <div class="cve-meta">PAN-OS · 0-day in the wild</div>
+          </div>
+          <div class="cve-badge critical">Critical</div>
+        </div>
+        <div class="cve-item">
+          <div class="cve-score" style="background:rgba(255,179,64,.1)">
+            <div class="cve-score-val" style="color:#ffb340">8.8</div>
+            <div class="cve-score-lbl" style="color:#ffb340">CVSS</div>
+          </div>
+          <div class="cve-info">
+            <div class="cve-id">CVE-2024-27198</div>
+            <div class="cve-desc">JetBrains TeamCity auth bypass</div>
+            <div class="cve-meta">TeamCity &lt;2023.11.4 · Ransomware vector</div>
+          </div>
+          <div class="cve-badge high">High</div>
+        </div>
+        <div class="cve-item">
+          <div class="cve-score" style="background:rgba(255,179,64,.1)">
+            <div class="cve-score-val" style="color:#ffb340">8.1</div>
+            <div class="cve-score-lbl" style="color:#ffb340">CVSS</div>
+          </div>
+          <div class="cve-info">
+            <div class="cve-id">CVE-2024-1708</div>
+            <div class="cve-desc">ConnectWise ScreenConnect path traversal</div>
+            <div class="cve-meta">ConnectWise · LockBit delivery</div>
+          </div>
+          <div class="cve-badge high">High</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTACK VECTORS -->
+  <h3 style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;margin-bottom:14px;letter-spacing:-.3px">Distribution Vectors (30-day window)</h3>
+  <div class="attack-grid">
+    <div class="av-card">
+      <div class="av-pct" style="color:#ff4567">34%</div>
+      <div class="av-icon">📧</div>
+      <div class="av-name">Phishing Emails</div>
+      <div class="av-desc">Malicious attachments and links delivered via spear-phishing campaigns. Primary vector for infostealers and ransomware.</div>
+    </div>
+    <div class="av-card">
+      <div class="av-pct" style="color:#ffb340">22%</div>
+      <div class="av-icon">🌐</div>
+      <div class="av-name">Drive-by Downloads</div>
+      <div class="av-desc">Browser exploits and malvertising delivering payloads silently through compromised or malicious websites.</div>
+    </div>
+    <div class="av-card">
+      <div class="av-pct" style="color:#ffb340">18%</div>
+      <div class="av-icon">🔓</div>
+      <div class="av-name">Vulnerable Services</div>
+      <div class="av-desc">Exploitation of unpatched RDP, VPN, and web services. Majority linked to actively exploited CVEs.</div>
+    </div>
+    <div class="av-card">
+      <div class="av-pct" style="color:#4f7fff">14%</div>
+      <div class="av-icon">📦</div>
+      <div class="av-name">Supply Chain</div>
+      <div class="av-desc">Malicious packages in npm, PyPI, and software updates. Increasingly used for targeted enterprise attacks.</div>
+    </div>
+    <div class="av-card">
+      <div class="av-pct" style="color:#00d4ff">8%</div>
+      <div class="av-icon">💾</div>
+      <div class="av-name">Removable Media</div>
+      <div class="av-desc">USB-based propagation particularly prevalent in industrial and air-gapped environments.</div>
+    </div>
+    <div class="av-card">
+      <div class="av-pct" style="color:#a78bfa">4%</div>
+      <div class="av-icon">🤝</div>
+      <div class="av-name">Insider Threats</div>
+      <div class="av-desc">Malicious insiders intentionally deploying malware or enabling external access to internal systems.</div>
+    </div>
+  </div>
+
+  <!-- MITRE ATT&CK HEATMAP -->
+  <div class="mitre-wrap">
+    <div class="mitre-title">MITRE ATT&CK Heatmap</div>
+    <div class="mitre-sub">Technique frequency across all threats detected this month</div>
+    <div class="mitre-grid" id="mitreGrid"></div>
+  </div>
+</div>
+
+<!-- ===== RESEARCH PAGE ===== -->
+<div class="page" id="page-research">
+  <div class="section-eyebrow">Academic Foundation</div>
+  <h2 class="section-title">Research Papers</h2>
+  <p class="section-sub">MalGuard's AI engine is grounded in 9 peer-reviewed papers spanning NLP tokenization, transformer architectures, deep learning, and ensemble methods.</p>
+
+  <div class="research-layout">
+    <div class="rf-panel">
+      <div class="rf-title">Filter by Topic</div>
+      <div class="rf-item active" onclick="filterPapers('all',this)"><div class="rf-dot" style="background:#7ab3ff"></div>All Papers (9)</div>
+      <div class="rf-item" onclick="filterPapers('nlp',this)"><div class="rf-dot" style="background:#a78bfa"></div>NLP / Transformers (5)</div>
+      <div class="rf-item" onclick="filterPapers('dl',this)"><div class="rf-dot" style="background:#7ab3ff"></div>Deep Learning (4)</div>
+      <div class="rf-item" onclick="filterPapers('ml',this)"><div class="rf-dot" style="background:var(--cyan)"></div>Machine Learning (2)</div>
+      <div class="rf-item" onclick="filterPapers('survey',this)"><div class="rf-dot" style="background:#ffb340"></div>Surveys (2)</div>
+    </div>
+
+    <div class="papers-list" id="papersList">
+      <div class="paper-card" data-tags="nlp transformer">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(124,92,252,.15);color:#a78bfa">01</div><div><div class="paper-venue">MDPI Big Data & Cognitive Computing · 2023</div><div class="ptags"><span class="ptag nlp">NLP</span><span class="ptag transformer">Transformer</span></div></div></div>
+        <div class="paper-title">MalBERTv2: Code-Aware BERT-Based Model for Malware Identification</div>
+        <div class="paper-authors">Rahali, A. & Akhloufi, M.A.</div>
+        <div class="paper-abstract">Presents MalBERTv2, a BERT-based language model fine-tuned for malware/goodware binary classification. Raw source code is tokenized as text, allowing the model to learn code semantics without hand-crafted features. Achieves state-of-the-art accuracy across multiple benchmark datasets and malware families.</div>
+        <div class="paper-footer"><span class="paper-year">2023</span><a href="https://www.mdpi.com/2504-2289/7/2/60" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="nlp transformer">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(124,92,252,.15);color:#a78bfa">02</div><div><div class="paper-venue">Computers & Security · 2023</div><div class="ptags"><span class="ptag nlp">NLP</span><span class="ptag transformer">Transformer</span></div></div></div>
+        <div class="paper-title">SeMalBERT: Semantics-Based Malware Detection with Bidirectional Encoder Representations</div>
+        <div class="paper-authors">Zhang et al.</div>
+        <div class="paper-abstract">Uses BERT's bidirectional encoding to extract semantic features from API call sequences. A joint ConvLSTM-AM model classifies specific malware family names, outperforming prior methods on API sequence benchmark datasets with high precision and recall.</div>
+        <div class="paper-footer"><span class="paper-year">2023</span><a href="https://www.sciencedirect.com/science/article/abs/pii/S2214212623002740" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="nlp dl">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(79,127,255,.15);color:#7ab3ff">03</div><div><div class="paper-venue">ScienceDirect · 2025</div><div class="ptags"><span class="ptag nlp">NLP</span><span class="ptag dl">Deep Learning</span></div></div></div>
+        <div class="paper-title">Efficient Malware Detection Using NLP and Deep Learning Models</div>
+        <div class="paper-authors">Anonymous et al.</div>
+        <div class="paper-abstract">Demonstrates that applying NLP to function call sequences combined with deep learning classifiers dramatically improves detection accuracy over signature-based methods. Validated on kernel API call datasets; the sigmoid-output model delivers strong binary classification results.</div>
+        <div class="paper-footer"><span class="paper-year">2025</span><a href="https://www.sciencedirect.com/science/article/pii/S1110016825004260" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="nlp transformer">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(124,92,252,.15);color:#a78bfa">04</div><div><div class="paper-venue">ACM ARES Conference · 2023</div><div class="ptags"><span class="ptag nlp">NLP</span><span class="ptag transformer">Transformer</span></div></div></div>
+        <div class="paper-title">Graph-Based Android Malware Detection and Categorization through BERT Transformer</div>
+        <div class="paper-authors">Saracino, A. & Simoni, M.</div>
+        <div class="paper-abstract">Leverages BERT to classify API call sequences from Android API Call Graphs, capturing inter-API relationships. Achieves high accuracy in distinguishing malicious from benign apps and categorizing specific malware families.</div>
+        <div class="paper-footer"><span class="paper-year">2023</span><a href="https://dl.acm.org/doi/fullHtml/10.1145/3600160.3605057" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="nlp dl">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(79,127,255,.15);color:#7ab3ff">05</div><div><div class="paper-venue">SVCC Conference · 2023</div><div class="ptags"><span class="ptag nlp">NLP</span><span class="ptag dl">Deep Learning</span></div></div></div>
+        <div class="paper-title">Malware Detection through Contextualized Vector Embeddings</div>
+        <div class="paper-authors">Pandya, V. & Di Troia, F.</div>
+        <div class="paper-abstract">Applies BERT, DistilBERT, ALBERT, and RoBERTa to generate context-dependent opcode embeddings, then trains CNNs, SVMs, Random Forests, and k-NNs. Contextualized embeddings dramatically outperform context-free Word2Vec and HMM2Vec baselines for malware family classification.</div>
+        <div class="paper-footer"><span class="paper-year">2023</span><a href="https://scholarworks.sjsu.edu/faculty_rsca/5018" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="dl transformer">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(79,127,255,.15);color:#7ab3ff">06</div><div><div class="paper-venue">arXiv · 2024</div><div class="ptags"><span class="ptag dl">Deep Learning</span><span class="ptag transformer">Transformer</span></div></div></div>
+        <div class="paper-title">EarlyMalDetect: Early Windows Malware Detection via API Call Sequences</div>
+        <div class="paper-authors">Anonymous et al.</div>
+        <div class="paper-abstract">Uses DistilBERT (40% fewer parameters, 69% faster) to tokenize API call sequences for early detection before malware fully executes. Demonstrates lightweight transformers offer excellent speed-accuracy trade-offs for real-time defense.</div>
+        <div class="paper-footer"><span class="paper-year">2024</span><a href="https://arxiv.org/html/2407.13355v1" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="dl transformer">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(0,212,255,.12);color:var(--cyan)">07</div><div><div class="paper-venue">arXiv · 2023</div><div class="ptags"><span class="ptag dl">Deep Learning</span><span class="ptag transformer">Transformer</span></div></div></div>
+        <div class="paper-title">Prompt Engineering-Assisted Malware Dynamic Analysis Using GPT-4</div>
+        <div class="paper-authors">Anonymous et al.</div>
+        <div class="paper-abstract">Introduces a GPT-4-based approach to dynamic malware analysis via API sequences, directly addressing concept drift. BERT provides semantic representations which GPT-4 refines through prompt-guided reasoning for contextual threat classification.</div>
+        <div class="paper-footer"><span class="paper-year">2023</span><a href="https://arxiv.org/html/2312.08317v1" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="survey dl">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(255,179,64,.12);color:#ffb340">08</div><div><div class="paper-venue">arXiv · 2024</div><div class="ptags"><span class="ptag survey">Survey</span><span class="ptag dl">Deep Learning</span></div></div></div>
+        <div class="paper-title">A Survey of Malware Detection Using Deep Learning</div>
+        <div class="paper-authors">Bensaoud & Kalita</div>
+        <div class="paper-abstract">Comprehensive survey across Windows, Android, Linux, macOS, and iOS covering static, dynamic, and hybrid detection. Reviews CNN-LSTM hybrids, transfer learning on opcodes, and NLP-based API analysis. Includes modern families: LockBit, REvil, Shlayer, Zeus, and Fleeceware.</div>
+        <div class="paper-footer"><span class="paper-year">2024</span><a href="https://arxiv.org/html/2407.19153v1" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+
+      <div class="paper-card" data-tags="survey ml">
+        <div class="paper-header"><div class="paper-num" style="background:rgba(255,179,64,.12);color:#ffb340">09</div><div><div class="paper-venue">Frontiers in Physics · 2024</div><div class="ptags"><span class="ptag survey">Survey</span><span class="ptag ml">Machine Learning</span></div></div></div>
+        <div class="paper-title">Deep Learning-Powered Malware Detection in Cyberspace: A Contemporary Review</div>
+        <div class="paper-authors">VIT Vellore Research Group</div>
+        <div class="paper-abstract">PRISMA 2020 systematic review of deep learning models in malware detection (2015–2023), covering RNNs, LSTMs, Deep Autoencoders, CNNs, and Deep Belief Networks. Identifies research gaps, benchmark datasets (BODMAS, SOREL-20M), and evaluation metrics.</div>
+        <div class="paper-footer"><span class="paper-year">2024</span><a href="https://www.frontiersin.org/journals/physics/articles/10.3389/fphy.2024.1349463/full" target="_blank" class="paper-link">Read Paper ↗</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
