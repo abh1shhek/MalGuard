@@ -11,6 +11,22 @@ AI-powered malware analysis platform featuring file scanning, URL reputation ana
 
 > Note: This repository currently demonstrates the frontend interface. Backend malware detection and AI inference are not included.
 
+ ## 🛠️ Built With
+
+- HTML5
+- CSS3
+- JavaScript (ES6)
+
+## Future Improvements
+
+- Backend malware scanning engine
+- VirusTotal API integration
+- Real-time sandbox analysis
+- Machine learning inference
+- User authentication
+- Scan history
+- Report export (PDF)
+
 
 ## Run
 
